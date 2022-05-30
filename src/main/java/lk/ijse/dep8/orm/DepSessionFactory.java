@@ -1,5 +1,6 @@
 package lk.ijse.dep8.orm;
 
+import com.sun.org.apache.xerces.internal.dom.DeepNodeListImpl;
 import lk.ijse.dep8.orm.annotation.Entity;
 import lk.ijse.dep8.orm.annotation.Id;
 
@@ -39,6 +40,7 @@ public class DepSessionFactory {
         for (Class<?> entity : entityClassList) {
             String tableName = entity.getDeclaredAnnotation(Entity.class).value();
             if (tableName.trim().isEmpty()) tableName = entity.getSimpleName();
+
             List<String> columns = new ArrayList<>();
             String primaryKey = null;
 
@@ -56,13 +58,14 @@ public class DepSessionFactory {
             if (primaryKey == null) throw new RuntimeException("Entity without a primary key");
 
             StringBuilder sb = new StringBuilder();
-            sb.append("CREATE TABLE ").append(tableName).append("(");
+            sb.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(");
             for (String column : columns) {
                 sb.append(column).append(" VARCHAR(255),");
             }
-            sb.append(primaryKey).append("VARCHAR(255) PRIMARY KEY)");
+            sb.append(primaryKey).append(" VARCHAR(255) PRIMARY KEY)");
+            System.out.println(sb);
             Statement stm = connection.createStatement();
-            stm.executeQuery(sb.toString());
+            stm.execute(sb.toString());
         }
     }
 
